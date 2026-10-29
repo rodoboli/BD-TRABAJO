@@ -1,0 +1,147 @@
+@startuml
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 12
+skinparam dpi 150
+skinparam roundcorner 6
+skinparam ArrowColor #2f4a3c
+skinparam ArrowFontColor #2f4a3c
+skinparam ArrowFontSize 11
+skinparam class {
+  BackgroundColor #F6F9F5
+  BorderColor #2f4a3c
+  HeaderBackgroundColor #E3ECE3
+  StereotypeFontColor #556b4b
+}
+skinparam object {
+  BackgroundColor #F6F9F5
+  BorderColor #2f4a3c
+}
+skinparam note {
+  BackgroundColor #FFF8EC
+  BorderColor #b86f52
+  FontSize 11
+}
+skinparam packageBorderColor #9aa79f
+hide circle
+skinparam titleFontSize 16
+skinparam packageFontColor #2f4a3c
+skinparam packageFontSize 13
+title Modelo conceptual completo · Cooperativa Agraria Virgen del Rocío
+
+package "A · Origen y recepción" {
+class Socio {
+  codSocio : Texto {id}
+  nombre : Texto
+  nif : Texto
+  direccion : Texto
+  telefono : Texto [0..1]
+  fechaAlta : Fecha
+}
+class Finca {
+  codFinca : Texto {id}
+  nombre : Texto
+  municipio : Texto
+  superficieHa : Decimal
+}
+class Producto {
+  codProducto : Texto {id}
+  nombre : Texto
+}
+class Variedad {
+  nombreVariedad : Texto
+}
+class "Campaña" as Campana {
+  codCampana : Texto {id}
+  fechaInicio : Fecha
+  fechaFin : Fecha
+}
+class "Recepción" as Recepcion {
+  numAlbaran : Texto {id}
+  fechaEntrada : FechaHora
+  pesoBruto : Decimal
+  pesoNeto : Decimal
+}
+}
+
+package "B · Clasificación y preparación" {
+class Lote {
+  codLote : Texto {id}
+  fechaCreacion : Fecha
+  /pesoTotal : Decimal
+  /cantidadApta : Decimal
+  /cantidadDestrio : Decimal
+  /aptoDisponible : Decimal
+}
+class "ClasificaciónLote" as ClasificacionLote {
+  fecha : Fecha
+  categoria : Categoria
+  calibre : Texto [0..1]
+  cantidad : Decimal
+}
+class "Palé" as Pale {
+  codPale : Texto {id}
+  tipoEnvasado : Texto
+  numBultos : Entero
+  pesoNeto : Decimal
+  fechaPreparacion : Fecha
+}
+class ComposicionPale {
+  cantidad : Decimal
+}
+enum Categoria {
+  APTO
+  DESTRIO
+}
+}
+
+package "C · Ventas y trazabilidad" {
+class Cliente {
+  codCliente : Texto {id}
+  nombre : Texto
+  nif : Texto
+  direccion : Texto
+  tipoCliente : Texto
+}
+class Venta {
+  numVenta : Texto {id}
+  fecha : Fecha
+  fechaSalida : Fecha [0..1]
+  destino : Texto
+  modalidad : Modalidad
+  /importeTotal : Decimal
+}
+class DetalleVenta {
+  numLinea : Entero
+  cantidad : Decimal
+  precioUnitario : Decimal
+  /importe : Decimal
+}
+enum Modalidad {
+  DIRECTA
+  SUBASTA
+}
+}
+
+' --- A
+Socio "1" -- "1..*" Finca : posee >
+Finca "1" -- "0..*" Recepcion : origina >
+Producto "1" *-- "1..*" Variedad : tiene >
+Variedad "1" -- "0..*" Recepcion : se recibe en >
+Campana "1" -- "0..*" Recepcion : < pertenece a
+Recepcion "1..*" -- "1" Lote : forma >
+' --- B
+Lote "1" *-- "0..*" ClasificacionLote : se clasifica en >
+Pale "1" *-- "1..*" ComposicionPale : se compone de >
+ComposicionPale "0..*" -- "1" Lote : procede de >
+ClasificacionLote ..> Categoria
+' --- C
+Cliente "1" -- "0..*" Venta : realiza >
+Venta "1" *-- "1..*" DetalleVenta : contiene >
+DetalleVenta "0..1" -- "0..1" Pale : vende >
+DetalleVenta "0..*" -- "0..1" Lote : vende directamente >
+Venta ..> Modalidad
+
+note "Restricciones\n• {pesoNeto <= pesoBruto} en Recepción\n• Lote: /pesoTotal = Σ pesoNeto de sus recepciones\n• {Σ ClasificaciónLote.cantidad = pesoTotal}\n• /aptoDisponible = cantidadApta − Σ ComposicionPale.cantidad\n     − Σ DetalleVenta.cantidad (venta directa)  {>= 0}\n• {Σ ComposicionPale.cantidad de un palé = pesoNeto}\n• El destrío nunca pasa a un palé ni a una venta\n• DetalleVenta {xor}: vende un palé o una cantidad de un lote\n• /importe = cantidad × precioUnitario; /importeTotal = Σ importe" as N1
+@enduml

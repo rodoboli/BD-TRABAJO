@@ -1,0 +1,78 @@
+@startuml
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 12
+skinparam dpi 150
+skinparam roundcorner 6
+skinparam ArrowColor #2f4a3c
+skinparam ArrowFontColor #2f4a3c
+skinparam ArrowFontSize 11
+skinparam class {
+  BackgroundColor #F6F9F5
+  BorderColor #2f4a3c
+  HeaderBackgroundColor #E3ECE3
+  StereotypeFontColor #556b4b
+}
+skinparam object {
+  BackgroundColor #F6F9F5
+  BorderColor #2f4a3c
+}
+skinparam note {
+  BackgroundColor #FFF8EC
+  BorderColor #b86f52
+  FontSize 11
+}
+skinparam packageBorderColor #9aa79f
+hide circle
+skinparam titleFontSize 15
+title Diagrama B · Clasificación y preparación
+class Lote {
+  codLote : Texto {id}
+  /pesoTotal : Decimal
+  /cantidadApta : Decimal
+  /cantidadDestrio : Decimal
+  /aptoDisponible : Decimal
+}
+class "ClasificaciónLote" as ClasificacionLote {
+  fecha : Fecha
+  categoria : Categoria
+  calibre : Texto [0..1]
+  cantidad : Decimal
+}
+enum Categoria {
+  APTO
+  DESTRIO
+}
+class "Palé" as Pale {
+  codPale : Texto {id}
+  tipoEnvasado : Texto
+  numBultos : Entero
+  pesoNeto : Decimal
+  fechaPreparacion : Fecha
+}
+class ComposicionPale {
+  cantidad : Decimal
+}
+Lote "1" *-- "0..*" ClasificacionLote : se clasifica en >
+Pale "1" *-- "1..*" ComposicionPale : se compone de >
+ComposicionPale "0..*" -- "1" Lote : procede de >
+ClasificacionLote ..> Categoria
+note right of ClasificacionLote
+  {Σ cantidad = pesoTotal del lote}
+  {cantidad > 0}
+end note
+note bottom of ComposicionPale
+  {Σ cantidad de un palé = pesoNeto}
+  {solo producto APTO: destrío nunca
+   pasa a un palé}
+end note
+note left of Lote
+  /cantidadApta = Σ clasificaciones APTO
+  /cantidadDestrio = Σ clasificaciones DESTRIO
+  /aptoDisponible = cantidadApta
+     − Σ ComposicionPale.cantidad
+     − Σ DetalleVenta.cantidad (venta directa)
+  {aptoDisponible >= 0}
+end note
+@enduml

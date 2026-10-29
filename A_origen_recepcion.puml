@@ -1,0 +1,83 @@
+@startuml
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 12
+skinparam dpi 150
+skinparam roundcorner 6
+skinparam ArrowColor #2f4a3c
+skinparam ArrowFontColor #2f4a3c
+skinparam ArrowFontSize 11
+skinparam class {
+  BackgroundColor #F6F9F5
+  BorderColor #2f4a3c
+  HeaderBackgroundColor #E3ECE3
+  StereotypeFontColor #556b4b
+}
+skinparam object {
+  BackgroundColor #F6F9F5
+  BorderColor #2f4a3c
+}
+skinparam note {
+  BackgroundColor #FFF8EC
+  BorderColor #b86f52
+  FontSize 11
+}
+skinparam packageBorderColor #9aa79f
+hide circle
+skinparam titleFontSize 15
+title Diagrama A · Origen y recepción
+class Socio {
+  codSocio : Texto {id}
+  nombre : Texto
+  nif : Texto
+  direccion : Texto
+  telefono : Texto [0..1]
+  fechaAlta : Fecha
+}
+class Finca {
+  codFinca : Texto {id}
+  nombre : Texto
+  municipio : Texto
+  superficieHa : Decimal
+}
+class Producto {
+  codProducto : Texto {id}
+  nombre : Texto
+}
+class Variedad {
+  nombreVariedad : Texto
+}
+class "Campaña" as Campana {
+  codCampana : Texto {id}
+  fechaInicio : Fecha
+  fechaFin : Fecha
+}
+class "Recepción" as Recepcion {
+  numAlbaran : Texto {id}
+  fechaEntrada : FechaHora
+  pesoBruto : Decimal
+  pesoNeto : Decimal
+}
+class Lote {
+  codLote : Texto {id}
+  fechaCreacion : Fecha
+  /pesoTotal : Decimal
+}
+Socio "1" -- "1..*" Finca : posee >
+Finca "1" -- "0..*" Recepcion : origina >
+Producto "1" *-- "1..*" Variedad : tiene >
+Variedad "1" -- "0..*" Recepcion : se recibe en >
+Campana "1" -- "0..*" Recepcion : pertenece a <
+Recepcion "1..*" -- "1" Lote : forma >
+note right of Lote
+  /pesoTotal = Σ pesoNeto de sus recepciones
+  {todas las recepciones de un lote son del
+   mismo socio, variedad, campaña y día}
+end note
+note left of Recepcion
+  {pesoNeto <= pesoBruto}
+  El socio se obtiene a través
+  de la finca.
+end note
+@enduml

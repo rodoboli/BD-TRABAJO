@@ -1,0 +1,106 @@
+@startuml
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 12
+skinparam dpi 150
+skinparam roundcorner 6
+skinparam ArrowColor #2f4a3c
+skinparam ArrowFontColor #2f4a3c
+skinparam ArrowFontSize 11
+skinparam class {
+  BackgroundColor #F6F9F5
+  BorderColor #2f4a3c
+  HeaderBackgroundColor #E3ECE3
+  StereotypeFontColor #556b4b
+}
+skinparam object {
+  BackgroundColor #F6F9F5
+  BorderColor #2f4a3c
+}
+skinparam note {
+  BackgroundColor #FFF8EC
+  BorderColor #b86f52
+  FontSize 11
+}
+skinparam packageBorderColor #9aa79f
+hide circle
+skinparam titleFontSize 15
+title Escenario 1 · Trazabilidad completa: del agricultor al cliente
+object "<u>soc1 : Socio</u>" as s1 {
+  codSocio = "SOC-001"
+  nombre = "Antonio Ruiz Pérez"
+}
+object "<u>f1 : Finca</u>" as f1 {
+  codFinca = "F-01"
+  nombre = "La Algaida"
+}
+object "<u>c2026 : Campaña</u>" as c26 {
+  codCampana = "2026"
+}
+object "<u>tomate : Producto</u>" as tom {
+  codProducto = "TOM"
+}
+object "<u>pera : Variedad</u>" as pera {
+  nombreVariedad = "Pera"
+}
+object "<u>alb1 : Recepción</u>" as r1 #FFF4D6 {
+  numAlbaran = "ALB-2026-001"
+  fechaEntrada = 20/06/2026 08:15
+  pesoNeto = 1000
+}
+object "<u>lote1 : Lote</u>" as l1 {
+  codLote = "LOT-2026-001"
+  /pesoTotal = 1000
+  /cantidadApta = 900
+  /cantidadDestrio = 100
+}
+object "<u>cl1 : ClasificaciónLote</u>" as cl1 {
+  categoria = APTO
+  calibre = "G"
+  cantidad = 900
+}
+object "<u>cl2 : ClasificaciónLote</u>" as cl2 {
+  categoria = DESTRIO
+  cantidad = 100
+}
+object "<u>comp1 : ComposicionPale</u>" as cp1 {
+  cantidad = 500
+}
+object "<u>pal1 : Palé</u>" as p1 #FFF4D6 {
+  codPale = "PAL-2026-001"
+  tipoEnvasado = "Caja cartón 10 kg"
+  numBultos = 50
+  pesoNeto = 500
+}
+object "<u>lin1 : DetalleVenta</u>" as dv1 {
+  numLinea = 1
+  cantidad = 500
+  precioUnitario = 1.20
+  /importe = 600.00
+}
+object "<u>ven1 : Venta</u>" as v1 #FFF4D6 {
+  numVenta = "VEN-2026-001"
+  fecha = 22/06/2026
+  destino = "Mercasevilla"
+  modalidad = DIRECTA
+  /importeTotal = 600.00
+}
+object "<u>cli1 : Cliente</u>" as c1 #FFF4D6 {
+  codCliente = "CLI-001"
+  nombre = "Hortalizas del Sur S.L."
+}
+s1 -- f1 : posee
+f1 -- r1 : origina
+tom *-- pera
+pera -- r1
+c26 -- r1
+r1 -- l1 : forma
+l1 *-- cl1
+l1 *-- cl2
+cp1 -- l1 : procede de
+p1 *-- cp1
+dv1 -- p1 : vende
+v1 *-- dv1
+c1 -- v1 : realiza
+@enduml

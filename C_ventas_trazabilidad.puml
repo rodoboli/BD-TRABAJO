@@ -1,0 +1,77 @@
+@startuml
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 12
+skinparam dpi 150
+skinparam roundcorner 6
+skinparam ArrowColor #2f4a3c
+skinparam ArrowFontColor #2f4a3c
+skinparam ArrowFontSize 11
+skinparam class {
+  BackgroundColor #F6F9F5
+  BorderColor #2f4a3c
+  HeaderBackgroundColor #E3ECE3
+  StereotypeFontColor #556b4b
+}
+skinparam object {
+  BackgroundColor #F6F9F5
+  BorderColor #2f4a3c
+}
+skinparam note {
+  BackgroundColor #FFF8EC
+  BorderColor #b86f52
+  FontSize 11
+}
+skinparam packageBorderColor #9aa79f
+hide circle
+skinparam titleFontSize 15
+title Diagrama C · Ventas y trazabilidad
+class Cliente {
+  codCliente : Texto {id}
+  nombre : Texto
+  nif : Texto
+  direccion : Texto
+  tipoCliente : Texto
+}
+class Venta {
+  numVenta : Texto {id}
+  fecha : Fecha
+  fechaSalida : Fecha [0..1]
+  destino : Texto
+  modalidad : Modalidad
+  /importeTotal : Decimal
+}
+enum Modalidad {
+  DIRECTA
+  SUBASTA
+}
+class DetalleVenta {
+  numLinea : Entero
+  cantidad : Decimal
+  precioUnitario : Decimal
+  /importe : Decimal
+}
+class "Palé" as Pale
+class Lote
+hide Pale members
+hide Lote members
+Cliente "1" -- "0..*" Venta : realiza >
+Venta "1" *-- "1..*" DetalleVenta : contiene >
+DetalleVenta "0..1" -- "0..1" Pale : vende >
+DetalleVenta "0..*" -- "0..1" Lote : vende directamente >
+Venta ..> Modalidad
+note right of DetalleVenta
+  {xor}: cada línea vende un palé
+  completo o una cantidad de un
+  lote (venta directa), nunca ambos.
+  /importe = cantidad × precioUnitario
+  Si vende un palé: cantidad = pesoNeto
+end note
+note bottom of Venta
+  /importeTotal = Σ importe de sus líneas
+  Trazabilidad: Venta → DetalleVenta →
+  (Palé → ComposicionPale →) Lote →
+  Recepción → Finca → Socio
+end note
+@enduml

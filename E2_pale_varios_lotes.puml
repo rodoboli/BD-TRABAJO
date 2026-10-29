@@ -1,0 +1,85 @@
+@startuml
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 12
+skinparam dpi 150
+skinparam roundcorner 6
+skinparam ArrowColor #2f4a3c
+skinparam ArrowFontColor #2f4a3c
+skinparam ArrowFontSize 11
+skinparam class {
+  BackgroundColor #F6F9F5
+  BorderColor #2f4a3c
+  HeaderBackgroundColor #E3ECE3
+  StereotypeFontColor #556b4b
+}
+skinparam object {
+  BackgroundColor #F6F9F5
+  BorderColor #2f4a3c
+}
+skinparam note {
+  BackgroundColor #FFF8EC
+  BorderColor #b86f52
+  FontSize 11
+}
+skinparam packageBorderColor #9aa79f
+hide circle
+skinparam titleFontSize 15
+title Escenario 2 · Un palé formado por varios lotes
+object "<u>soc1 : Socio</u>" as s1 {
+  codSocio = "SOC-001"
+}
+object "<u>soc2 : Socio</u>" as s2 {
+  codSocio = "SOC-002"
+  nombre = "María López Gil"
+}
+object "<u>f1 : Finca</u>" as f1 {
+  codFinca = "F-01"
+}
+object "<u>f3 : Finca</u>" as f3 {
+  codFinca = "F-03"
+}
+object "<u>alb1 : Recepción</u>" as r1 {
+  numAlbaran = "ALB-2026-001"
+}
+object "<u>alb2 : Recepción</u>" as r2 {
+  numAlbaran = "ALB-2026-002"
+  pesoNeto = 400
+}
+object "<u>lote1 : Lote</u>" as l1 {
+  codLote = "LOT-2026-001"
+  /cantidadApta = 900
+}
+object "<u>lote2 : Lote</u>" as l2 {
+  codLote = "LOT-2026-002"
+  /cantidadApta = 400
+}
+object "<u>comp2 : ComposicionPale</u>" as cp2 #FFF4D6 {
+  cantidad = 300
+}
+object "<u>comp3 : ComposicionPale</u>" as cp3 #FFF4D6 {
+  cantidad = 200
+}
+object "<u>pal10 : Palé</u>" as p10 #FFF4D6 {
+  codPale = "PAL-2026-010"
+  tipoEnvasado = "Caja cartón 10 kg"
+  numBultos = 50
+  pesoNeto = 500
+}
+s1 -- f1
+s2 -- f3
+f1 -- r1
+f3 -- r2
+r1 -- l1
+r2 -- l2
+p10 *-- cp2
+p10 *-- cp3
+cp2 -- l1 : procede de
+cp3 -- l2 : procede de
+note right of p10
+  Comprobación:
+  2 orígenes: LOT-2026-001 y LOT-2026-002
+  300 + 200 = 500 = pesoNeto
+end note
+@enduml

@@ -1,0 +1,75 @@
+@startuml
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 12
+skinparam dpi 150
+skinparam roundcorner 6
+skinparam ArrowColor #2f4a3c
+skinparam ArrowFontColor #2f4a3c
+skinparam ArrowFontSize 11
+skinparam class {
+  BackgroundColor #F6F9F5
+  BorderColor #2f4a3c
+  HeaderBackgroundColor #E3ECE3
+  StereotypeFontColor #556b4b
+}
+skinparam object {
+  BackgroundColor #F6F9F5
+  BorderColor #2f4a3c
+}
+skinparam note {
+  BackgroundColor #FFF8EC
+  BorderColor #b86f52
+  FontSize 11
+}
+skinparam packageBorderColor #9aa79f
+hide circle
+skinparam titleFontSize 15
+title Escenario 3 · Venta directa sin manipulación
+object "<u>soc1 : Socio</u>" as s1 {
+  codSocio = "SOC-001"
+}
+object "<u>f1 : Finca</u>" as f1 {
+  codFinca = "F-01"
+}
+object "<u>alb1 : Recepción</u>" as r1 #FFF4D6 {
+  numAlbaran = "ALB-2026-001"
+}
+object "<u>lote1 : Lote</u>" as l1 #FFF4D6 {
+  codLote = "LOT-2026-001"
+  /cantidadApta = 900
+  /aptoDisponible = 0
+}
+object "<u>lin1 : DetalleVenta</u>" as dv #FFF4D6 {
+  numLinea = 1
+  cantidad = 100
+  precioUnitario = 1.00
+  /importe = 100.00
+}
+object "<u>ven2 : Venta</u>" as v2 #FFF4D6 {
+  numVenta = "VEN-2026-002"
+  fecha = 24/06/2026
+  destino = "Frutería La Plaza (Sanlúcar)"
+  modalidad = DIRECTA
+  /importeTotal = 100.00
+}
+object "<u>cli2 : Cliente</u>" as c2 #FFF4D6 {
+  codCliente = "CLI-002"
+  nombre = "Frutería La Plaza"
+  tipoCliente = "Comercio local"
+}
+s1 -- f1
+f1 -- r1
+r1 -- l1 : forma
+dv -- l1 : vende directamente
+v2 *-- dv
+c2 -- v2 : realiza
+note right of dv
+  Ningún palé: la línea apunta al lote.
+  aptoDisponible de LOT-2026-001:
+  900 − 500 (PAL-2026-001)
+      − 300 (PAL-2026-010)
+      − 100 (esta venta) = 0
+end note
+@enduml
