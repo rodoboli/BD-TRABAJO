@@ -1,0 +1,209 @@
+@startuml
+@startuml MC_completo_legible
+' ============================================================
+'  Modelo conceptual · Cooperativa Agraria Virgen del Rocío
+'  Versión legible: texto grande, un color por bloque,
+'  más espacio entre clases y notas pequeñas junto a su clase
+' ============================================================
+
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 16
+skinparam dpi 200
+skinparam roundcorner 10
+skinparam nodesep 40
+skinparam ranksep 90
+left to right direction
+skinparam padding 4
+skinparam ClassFontStyle bold
+skinparam ClassFontSize 18
+skinparam ClassAttributeFontSize 14
+skinparam ArrowColor #2f4a3c
+skinparam ArrowThickness 1.6
+skinparam ArrowFontColor #1f2f26
+skinparam ArrowFontSize 14
+skinparam titleFontSize 26
+skinparam titleFontColor #2f4a3c
+
+' --- Un color por bloque -------------------------------------
+skinparam class {
+  BorderColor #2f4a3c
+  BorderThickness 1.6
+  BackgroundColor<<A>> #E3F1E3
+  HeaderBackgroundColor<<A>> #BFE0BF
+  BackgroundColor<<B>> #E4EEF9
+  HeaderBackgroundColor<<B>> #BBD5F0
+  BackgroundColor<<C>> #F1E6F7
+  HeaderBackgroundColor<<C>> #D8BFE8
+}
+skinparam enum {
+  BackgroundColor #FFF4D6
+  HeaderBackgroundColor #F5DC96
+  BorderColor #8a6d1f
+}
+skinparam note {
+  BackgroundColor #FFF8EC
+  BorderColor #b86f52
+  FontSize 13
+}
+skinparam package {
+  BorderColor #9aa79f
+  FontColor #2f4a3c
+  FontSize 20
+  FontStyle bold
+  BackgroundColor<<A>> #F6FBF6
+  BackgroundColor<<B>> #F7FAFD
+  BackgroundColor<<C>> #FBF8FD
+}
+
+skinparam legend {
+  BackgroundColor #FFF8EC
+  BorderColor #b86f52
+  FontSize 15
+}
+hide circle
+hide empty members
+hide stereotype
+
+title Modelo conceptual · Cooperativa Agraria Virgen del Rocío
+
+' ============================================================
+package "A · Origen y recepción" <<A>> {
+  class Socio <<A>> {
+    codSocio {id}
+    nombre
+    nif
+    direccion
+    telefono [0..1]
+    fechaAlta
+  }
+  class Finca <<A>> {
+    codFinca {id}
+    nombre
+    municipio
+    superficieHa
+  }
+  class Producto <<A>> {
+    codProducto {id}
+    nombre
+  }
+  class Variedad <<A>> {
+    nombreVariedad
+  }
+  class "Campaña" as Campana <<A>> {
+    codCampana {id}
+    fechaInicio
+    fechaFin
+  }
+  class "Recepción" as Recepcion <<A>> {
+    numAlbaran {id}
+    fechaEntrada
+    pesoBruto
+    pesoNeto
+  }
+}
+
+' ============================================================
+package "B · Clasificación y preparación" <<B>> {
+  class Lote <<B>> {
+    codLote {id}
+    fechaCreacion
+    ..derivados..
+    /pesoTotal
+    /cantidadApta
+    /cantidadDestrio
+    /aptoDisponible
+  }
+  class "ClasificaciónLote" as ClasificacionLote <<B>> {
+    fecha
+    categoria
+    calibre [0..1]
+    cantidad
+  }
+  class "Palé" as Pale <<B>> {
+    codPale {id}
+    tipoEnvasado
+    numBultos
+    pesoNeto
+    fechaPreparacion
+  }
+  class ComposicionPale <<B>> {
+    cantidad
+  }
+  enum Categoria {
+    APTO
+    DESTRIO
+  }
+}
+
+' ============================================================
+package "C · Ventas y trazabilidad" <<C>> {
+  class Cliente <<C>> {
+    codCliente {id}
+    nombre
+    nif
+    direccion
+    tipoCliente
+  }
+  class Venta <<C>> {
+    numVenta {id}
+    fecha
+    fechaSalida [0..1]
+    destino
+    modalidad
+    ..derivado..
+    /importeTotal
+  }
+  class DetalleVenta <<C>> {
+    numLinea
+    cantidad
+    precioUnitario
+    ..derivado..
+    /importe
+  }
+  enum Modalidad {
+    DIRECTA
+    SUBASTA
+  }
+}
+
+' ============================================================
+'  RELACIONES
+' ============================================================
+' --- A
+Socio "1" -- "1..*" Finca : posee >
+Finca "1" -- "0..*" Recepcion : origina >
+Producto "1" *-- "1..*" Variedad : tiene >
+Variedad "1" -- "0..*" Recepcion : se recibe en >
+Campana "1" -- "0..*" Recepcion : < pertenece a
+Recepcion "1..*" -- "1" Lote : forma >
+
+' --- B
+Lote "1" *-- "0..*" ClasificacionLote : se clasifica en >
+Pale "1" *-- "1..*" ComposicionPale : se compone de >
+ComposicionPale "0..*" -- "1" Lote : procede de >
+ClasificacionLote ..> Categoria
+
+' --- C
+Cliente "1" -- "0..*" Venta : realiza >
+Venta "1" *-- "1..*" DetalleVenta : contiene >
+Pale "0..1" -- "0..1" DetalleVenta : < vende
+Lote "0..1" -- "0..*" DetalleVenta : < vende directamente
+Venta ..> Modalidad
+
+legend bottom
+  <b>Restricciones</b>
+  |= Dónde |= Regla |
+  | Recepción | {pesoNeto <= pesoBruto} |
+  | Lote | /pesoTotal = Σ pesoNeto de sus recepciones |
+  | Lote | /aptoDisponible = cantidadApta − Σ ComposicionPale.cantidad − Σ DetalleVenta.cantidad (venta directa)   {>= 0} |
+  | ClasificaciónLote | {Σ cantidad = pesoTotal del lote} |
+  | ClasificaciónLote | El destrío nunca pasa a un palé ni a una venta |
+  | ComposicionPale | {Σ cantidad de un palé = pesoNeto} |
+  | DetalleVenta | {xor}: vende un palé o una cantidad de un lote |
+  | DetalleVenta | /importe = cantidad × precioUnitario |
+  | Venta | /importeTotal = Σ importe de sus líneas |
+endlegend
+
+@enduml
